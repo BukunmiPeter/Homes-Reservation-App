@@ -46,7 +46,7 @@ export default function PlacesFormPage() {
       <p className="text-gray-500 text-sm">{text}</p>
     );
   }
-  function preInput(header,description) {
+  function  preInput(header,description) {
     return (
       <>
         {inputHeader(header)}

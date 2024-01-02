@@ -51,7 +51,7 @@ async function uploadToS3(path, originalFilename, mimetype) {
 }
 
 function getUserDataFromReq(req) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => { 
     jwt.verify(req.cookies.token, jwtSecret, {}, async (err, userData) => {
       if (err) throw err;
       resolve(userData);
@@ -96,7 +96,7 @@ app.post('/api/login', async (req,res) => {
   if (userDoc) {
     const passOk = bcrypt.compareSync(password, userDoc.password);
     if (passOk) {
-      jwt.sign({
+      jwt.sign({  
         email:userDoc.email,
         id:userDoc._id
       }, jwtSecret, {}, (err,token) => {
@@ -132,13 +132,15 @@ app.post('/api/logout', (req,res) => {
 
 app.post('/api/upload-by-link', async (req,res) => {
   const {link} = req.body;
+  console.log(link, "dd")
   const newName = 'photo' + Date.now() + '.jpg';
   await imageDownloader.image({
     url: link,
-    dest: '/tmp/' +newName,
+    // dest: '/tmp/' +newName,
+     dest: __dirname + "/uploads/" +newName,
   });
-  const url = await uploadToS3('/tmp/' +newName, newName, mime.lookup('/tmp/' +newName));
-  res.json(url);
+//   const url = await uploadToS3('/tmp/' +newName, newName, mime.lookup('/tmp/' +newName));
+  res.json(newName);
 });
 
 const photosMiddleware = multer({dest:'/tmp'});
@@ -146,8 +148,10 @@ app.post('/api/upload', photosMiddleware.array('photos', 100), async (req,res) =
   const uploadedFiles = [];
   for (let i = 0; i < req.files.length; i++) {
     const {path,originalname,mimetype} = req.files[i];
-    const url = await uploadToS3(path, originalname, mimetype);
-    uploadedFiles.push(url);
+    console.log("use",req.files[i])
+    // const url = await uploadToS3(path, originalname, mimetype);
+    // uploadedFiles.push(url);
+    uploadedFiles.push(originalname);
   }
   res.json(uploadedFiles);
 });
@@ -196,7 +200,7 @@ app.put('/api/places', async (req,res) => {
     if (err) throw err;
     const placeDoc = await Place.findById(id);
     if (userData.id === placeDoc.owner.toString()) {
-      placeDoc.set({
+      placeDoc.set({ 
         title,address,photos:addedPhotos,description,
         perks,extraInfo,checkIn,checkOut,maxGuests,price,
       });
